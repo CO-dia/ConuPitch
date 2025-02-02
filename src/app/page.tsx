@@ -16,11 +16,12 @@ export default function Home() {
     startCountdown,
     timer,
     timerCountdown,
+    setActualIndex,
     setConfirm,
     setRecordVoice,
+    setStartCountdown,
     setText,
     setTimer,
-    setStartCountdown,
     setTimerCountdown,
   } = useHome();
 
@@ -63,7 +64,7 @@ export default function Home() {
             className={`w-2 h-2 bg-white ${recordVoice ? "" : "rounded-full"}`}
           />
         </Button>
-        <Prompter text={prompterText} actualId={actualIndex} />
+        <Prompter text={prompterText} actualId={actualIndex} setActualId={setActualIndex} />
       </div>
     </div>
   );

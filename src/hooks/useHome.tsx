@@ -160,7 +160,7 @@ const useHome = () => {
 
   const processText = (text: string) => {
     const sentences = text.split(/[,.]/).map((sentence) => sentence.trim());
-
+/* 
     // Further split sentences into chunks of 5 words if they're too long
     const processedChunks: string[] = [];
     sentences.forEach((sentence) => {
@@ -175,9 +175,9 @@ const useHome = () => {
         // Otherwise, keep the sentence as is
         processedChunks.push(sentence);
       }
-    });
+    }); */
 
-    return processedChunks;
+    return sentences;
   };
 
   // Sync the ref with the state
@@ -218,6 +218,7 @@ const useHome = () => {
     startCountdown,
     timer,
     timerCountdown,
+    setActualIndex,
     setConfirm,
     setText,
     setTimer,
