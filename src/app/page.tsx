@@ -1,19 +1,32 @@
 "use client";
 
+import Countdown from "@/components/Countdown";
 import Prompter from "@/components/Prompter";
+import TimePicker from "@/components/TimePicker";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import useHome from "@/hooks/useHome";
+import { useEffect } from "react";
 
 export default function Home() {
   const {
     actualIndex,
     prompterText,
     recordVoice,
-    setText,
+    startCountdown,
+    timer,
+    timerCountdown,
     setConfirm,
     setRecordVoice,
+    setText,
+    setTimer,
+    setStartCountdown,
+    setTimerCountdown,
   } = useHome();
+
+  useEffect(() => {
+    console.log("timer", timer)
+  }, [timer]);
 
   return (
     <div className="flex flex-col items-center mt-10">
@@ -24,20 +37,26 @@ export default function Home() {
             setText(e.target.value);
           }}
         />
-        <Button
-          onClick={() => {
-            setConfirm(true);
-          }}
-        >
-          Confirm
-        </Button>
+        <div className="flex flex-col gap-5">
+          <TimePicker setTimer={setTimer} />
+          <Button
+            onClick={() => {
+              setTimerCountdown(timer);
+              setConfirm(true);
+            }}
+          >
+            Confirm
+          </Button>
+        </div>
       </div>
 
       <div className="mt-16">
+        <Countdown initialTime={timerCountdown} start={startCountdown} />
         <Button
-          className="bg-red-500 w-10 h-10 rounded-full"
+          className="ml-5 bg-red-500 w-10 h-10 rounded-full"
           onClick={() => {
             setRecordVoice(!recordVoice);
+            setStartCountdown(!startCountdown);
           }}
         >
           <div

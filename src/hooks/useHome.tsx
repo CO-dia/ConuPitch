@@ -15,6 +15,12 @@ const useHome = () => {
   const [micStream, setMicStream] = useState<MediaStream | null>(null);
   const [confirm, setConfirm] = useState(false);
   const [prompterText, setPrompterText] = useState<string[]>([]);
+
+  // Timer
+  const [timer, setTimer] = useState("");
+  const [timerCountdown, setTimerCountdown] = useState("");
+  const [startCountdown, setStartCountdown] = useState(false);
+
   const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] =
     useState(false);
 
@@ -118,7 +124,13 @@ const useHome = () => {
 
   const matchSentenceIndex = (sentences: string[], transcript: string) => {
     const onlyNextSentences = sentences.slice(actualIndexRef.current);
-    const fuse = new Fuse(onlyNextSentences, {
+    let onlyFiveNextSentences = onlyNextSentences;
+    if (onlyNextSentences.length > 5) {
+        onlyFiveNextSentences = onlyNextSentences.slice(0, 5); // Limit to 5 chunks to make sure the search is fast and it doesn't go to far ahead
+    }
+
+    console.log("onlyFiveNextSentences:", onlyFiveNextSentences);
+    const fuse = new Fuse(onlyFiveNextSentences, {
       includeScore: true,
       threshold: 0.3, // Adjust this to determine how fuzzy the search can be
     });
@@ -139,7 +151,7 @@ const useHome = () => {
             top: element.offsetTop,
             left: element.offsetLeft,
             behavior: "smooth",
-        });
+          });
         }
         return index;
       });
@@ -199,13 +211,19 @@ const useHome = () => {
   }, [confirm]);
 
   return {
-    prompterText,
-    recordVoice,
     actualIndex,
     isSpeechRecognitionSupported,
-    setText,
+    prompterText,
+    recordVoice,
+    startCountdown,
+    timer,
+    timerCountdown,
     setConfirm,
+    setText,
+    setTimer,
     setRecordVoice,
+    setStartCountdown,
+    setTimerCountdown
   };
 };
 
