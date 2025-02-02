@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { usePrompter } from "@/contexts/prompterContext";
 
 export default function Home() {
-  const { timer, router, setConfirm, setText, setTimer, setTimerCountdown } =
+  const { timer, setConfirm, setText, setTimer, setTimerCountdown } =
     usePrompter();
 
   return (
@@ -28,7 +28,6 @@ export default function Home() {
           onClick={() => {
             setTimerCountdown(timer);
             setConfirm(true);
-            router.push("/prompter");
           }}
         >
           Confirm

@@ -9,24 +9,26 @@ import { usePrompter } from "@/contexts/prompterContext";
 const PrompterPage = () => {
   const {
     actualIndex,
+    actualIndexRef,
+    elapsedTime,
     prompterText,
+    progressText,
     recordVoice,
     startCountdown,
-    timerCountdown,
+    timing,
     setActualIndex,
+    setElapsedTime,
     setRecordVoice,
     setStartCountdown,
+    setProgressText,
   } = usePrompter();
 
   return (
     <div className="flex flex-col items-center">
       <div className="flex flex-col items-center w-[90vw] gap-10">
-        <h1 className="text-5xl text-[#000957] mt-10">
-          CON<span className="text-6xl text-[#EBE645]">U</span>PITCH ?
-        </h1>
-        <div className="flex w-full justify-between">
+        <div className="flex w-full justify-between py-4 fixed bg-white/90">
           <Button
-            className="bg-[#EBE645] text-black text-4xl p-6 rounded-full place-items-end"
+            className="bg-[#EBE645] text-black text-4xl ml-3 p-6 rounded-full place-items-end"
             onClick={() => {
               setRecordVoice(!recordVoice);
               setStartCountdown(!startCountdown);
@@ -34,13 +36,17 @@ const PrompterPage = () => {
           >
             {recordVoice ? "Stop" : "Start"}
           </Button>
-          <Countdown initialTime={timerCountdown} start={startCountdown} />
+          <div className="text-4xl">{progressText}</div>
+          <Countdown actualIdRef={actualIndexRef}  timing={timing} setProgressText={setProgressText} elapsedTime={elapsedTime} start={startCountdown} setElapsedTime={setElapsedTime} />
         </div>
-        <Prompter
-          text={prompterText}
-          actualId={actualIndex}
-          setActualId={setActualIndex}
-        />
+        <div className="mt-40">
+          <Prompter
+            text={prompterText}
+            actualId={actualIndex}
+            setActualId={setActualIndex}
+            timing={timing}
+          />
+        </div>
       </div>
     </div>
   );

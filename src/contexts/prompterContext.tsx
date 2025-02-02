@@ -14,15 +14,21 @@ import React, {
 // Define the context type
 interface PrompterContextType {
   actualIndex: number;
+  actualIndexRef: React.MutableRefObject<number>;
+  elapsedTime: number;
   isSpeechRecognitionSupported: boolean;
   prompterText: string[];
+  progressText: string;
   recordVoice: boolean;
   router: any;
   startCountdown: boolean;
   timer: string;
   timerCountdown: any;
+  timing: any[];
   setActualIndex: React.Dispatch<React.SetStateAction<number>>;
+  setElapsedTime: React.Dispatch<React.SetStateAction<number>>;
   setConfirm: React.Dispatch<React.SetStateAction<boolean>>;
+  setProgressText: React.Dispatch<React.SetStateAction<string>>;
   setText: React.Dispatch<React.SetStateAction<string>>;
   setTimer: React.Dispatch<React.SetStateAction<string>>;
   setRecordVoice: React.Dispatch<React.SetStateAction<boolean>>;
@@ -46,8 +52,11 @@ const PrompterContext = createContext<PrompterContextType | undefined>(
 // Provide the context to the application
 export const PrompterProvider = ({ children }: { children: ReactNode }) => {
   // For countdown
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const [progressText, setProgressText] = useState("");
   const [startCountdown, setStartCountdown] = useState(false);
   const [timerCountdown, setTimerCountdown] = useState();
+  const [timing, setTiming] = useState<any[]>([]);
 
   // For prompter
   const [prompterText, setPrompterText] = useState<string[]>([]);
@@ -66,9 +75,9 @@ export const PrompterProvider = ({ children }: { children: ReactNode }) => {
 
   // Timer
   const [timer, setTimer] = useState("");
-  
+
   const router = useRouter();
-  
+
   const actualIndexRef = useRef(0); // Create a ref to store the latest actualIndex
 
   // Request microphone access
@@ -229,6 +238,28 @@ export const PrompterProvider = ({ children }: { children: ReactNode }) => {
     if (confirm) {
       const processedText = processText(text);
       setPrompterText(processedText);
+      const nonEmptyChunks = processedText.filter(
+        (chunk) => chunk.trim() !== ""
+      );
+      // Create an object with the chunk and its id
+      const chunks = nonEmptyChunks.map((chunk, index) => ({
+        id: index,
+        chunk,
+      }));
+      fetch("/api/estimate", {
+        method: "POST",
+        body: JSON.stringify({ chunks: chunks, time: timer }),
+      })
+        .then((response) => response.json())
+        .then((data) => {
+          console.log("Estimated time:", data.estimatedTime);
+          setTiming(data.estimatedTime);
+          router.push("/prompter");
+        })
+        .catch((error) => {
+          console.error("Error estimating time:", error);
+        });
+
       setConfirm(false);
     }
   }, [confirm]);
@@ -237,14 +268,20 @@ export const PrompterProvider = ({ children }: { children: ReactNode }) => {
     <PrompterContext.Provider
       value={{
         actualIndex,
+        actualIndexRef,
+        elapsedTime,
         isSpeechRecognitionSupported,
         prompterText,
+        progressText,
         recordVoice,
         router,
         startCountdown,
         timer,
         timerCountdown,
+        timing,
         setActualIndex,
+        setElapsedTime,
+        setProgressText,
         setConfirm,
         setText,
         setTimer,
