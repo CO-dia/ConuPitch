@@ -14,10 +14,23 @@ const TimePicker: React.FC<TimePickerProps> = ({ setTimer }) => {
   }, [minutes, seconds]);
 
   return (
-    <div className="flex items-center gap-2">
-      <TimeInput value={minutes} maximum={99} setValue={setMinutes} />
-      :
-      <TimeInput value={seconds} maximum={60} setValue={setSeconds} />
+    <div className="flex flex-col text-white">
+      <h4>Time </h4>
+      <div className="flex gap-2">
+        <TimeInput
+          name="Minutes"
+          value={minutes}
+          maximum={99}
+          setValue={setMinutes}
+        />
+        <span className="mt-3">:</span>
+        <TimeInput
+          name="Seconds"
+          value={seconds}
+          maximum={60}
+          setValue={setSeconds}
+        />
+      </div>
     </div>
   );
 };

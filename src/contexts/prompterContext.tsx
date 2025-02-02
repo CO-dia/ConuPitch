@@ -1,5 +1,34 @@
+"use client";
+
 import Fuse from "fuse.js";
-import { useEffect, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+  useRef,
+} from "react";
+
+// Define the context type
+interface PrompterContextType {
+  actualIndex: number;
+  isSpeechRecognitionSupported: boolean;
+  prompterText: string[];
+  recordVoice: boolean;
+  router: any;
+  startCountdown: boolean;
+  timer: string;
+  timerCountdown: any;
+  setActualIndex: React.Dispatch<React.SetStateAction<number>>;
+  setConfirm: React.Dispatch<React.SetStateAction<boolean>>;
+  setText: React.Dispatch<React.SetStateAction<string>>;
+  setTimer: React.Dispatch<React.SetStateAction<string>>;
+  setRecordVoice: React.Dispatch<React.SetStateAction<boolean>>;
+  setStartCountdown: React.Dispatch<React.SetStateAction<boolean>>;
+  setTimerCountdown: React.Dispatch<React.SetStateAction<any>>;
+}
 
 // Declare types for SpeechRecognition if it's not in the global type definitions
 declare global {
@@ -9,34 +38,38 @@ declare global {
   }
 }
 
-const useHome = () => {
-  const [text, setText] = useState("");
-  const [recordVoice, setRecordVoice] = useState(false);
-  const [micStream, setMicStream] = useState<MediaStream | null>(null);
-  const [confirm, setConfirm] = useState(false);
+// Create the context with a default value (optional)
+const PrompterContext = createContext<PrompterContextType | undefined>(
+  undefined
+);
+
+// Provide the context to the application
+export const PrompterProvider = ({ children }: { children: ReactNode }) => {
+  // For countdown
+  const [startCountdown, setStartCountdown] = useState(false);
+  const [timerCountdown, setTimerCountdown] = useState();
+
+  // For prompter
   const [prompterText, setPrompterText] = useState<string[]>([]);
 
-  // Timer
-  const [timer, setTimer] = useState("");
-  const [timerCountdown, setTimerCountdown] = useState("");
-  const [startCountdown, setStartCountdown] = useState(false);
+  // For line selection
+  const [actualIndex, setActualIndex] = useState(0);
 
+  // For recording voice
+  const [recordVoice, setRecordVoice] = useState(false);
+  const [micStream, setMicStream] = useState<MediaStream | null>(null);
   const [isSpeechRecognitionSupported, setIsSpeechRecognitionSupported] =
     useState(false);
 
-  const [actualIndex, setActualIndex] = useState(0);
-  const actualIndexRef = useRef(0); // Create a ref to store the latest actualIndex
+  const [text, setText] = useState("");
+  const [confirm, setConfirm] = useState(false);
 
-  // Check for browser support
-  useEffect(() => {
-    const SpeechRecognition =
-      window.SpeechRecognition || window.webkitSpeechRecognition;
-    if (SpeechRecognition) {
-      setIsSpeechRecognitionSupported(true);
-    } else {
-      console.error("Speech recognition is not supported in this browser.");
-    }
-  }, []);
+  // Timer
+  const [timer, setTimer] = useState("");
+  
+  const router = useRouter();
+  
+  const actualIndexRef = useRef(0); // Create a ref to store the latest actualIndex
 
   // Request microphone access
   const getMicrophoneAccess = async () => {
@@ -126,10 +159,9 @@ const useHome = () => {
     const onlyNextSentences = sentences.slice(actualIndexRef.current);
     let onlyFiveNextSentences = onlyNextSentences;
     if (onlyNextSentences.length > 5) {
-        onlyFiveNextSentences = onlyNextSentences.slice(0, 5); // Limit to 5 chunks to make sure the search is fast and it doesn't go to far ahead
+      onlyFiveNextSentences = onlyNextSentences.slice(1, 6); // Limit to 5 chunks to make sure the search is fast and it doesn't go to far ahead
     }
 
-    console.log("onlyFiveNextSentences:", onlyFiveNextSentences);
     const fuse = new Fuse(onlyFiveNextSentences, {
       includeScore: true,
       threshold: 0.3, // Adjust this to determine how fuzzy the search can be
@@ -148,7 +180,7 @@ const useHome = () => {
         const element = document.getElementById(index.toString());
         if (element) {
           window.scrollTo({
-            top: element.offsetTop,
+            top: element.offsetTop - 100,
             left: element.offsetLeft,
             behavior: "smooth",
           });
@@ -159,26 +191,19 @@ const useHome = () => {
   };
 
   const processText = (text: string) => {
-    const sentences = text.split(/[,.]/).map((sentence) => sentence.trim());
-/* 
-    // Further split sentences into chunks of 5 words if they're too long
-    const processedChunks: string[] = [];
-    sentences.forEach((sentence) => {
-      const words = sentence.split(/\s+/).filter((word) => word.trim() !== "");
-
-      // If the sentence has more than 5 words, split into 5-word chunks
-      if (words.length > 8) {
-        for (let i = 0; i < words.length; i += 8) {
-          processedChunks.push(words.slice(i, i + 8).join(" "));
-        }
-      } else {
-        // Otherwise, keep the sentence as is
-        processedChunks.push(sentence);
-      }
-    }); */
-
-    return sentences;
+    return text.split(/[,.]/).map((sentence) => sentence.trim());
   };
+
+  // Check for browser support
+  useEffect(() => {
+    const SpeechRecognition =
+      window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+      setIsSpeechRecognitionSupported(true);
+    } else {
+      console.error("Speech recognition is not supported in this browser.");
+    }
+  }, []);
 
   // Sync the ref with the state
   useEffect(() => {
@@ -187,8 +212,6 @@ const useHome = () => {
 
   // Handle recording state
   useEffect(() => {
-    console.log("recordVoice:", recordVoice);
-
     if (recordVoice) {
       startListening();
     } else {
@@ -210,22 +233,36 @@ const useHome = () => {
     }
   }, [confirm]);
 
-  return {
-    actualIndex,
-    isSpeechRecognitionSupported,
-    prompterText,
-    recordVoice,
-    startCountdown,
-    timer,
-    timerCountdown,
-    setActualIndex,
-    setConfirm,
-    setText,
-    setTimer,
-    setRecordVoice,
-    setStartCountdown,
-    setTimerCountdown
-  };
+  return (
+    <PrompterContext.Provider
+      value={{
+        actualIndex,
+        isSpeechRecognitionSupported,
+        prompterText,
+        recordVoice,
+        router,
+        startCountdown,
+        timer,
+        timerCountdown,
+        setActualIndex,
+        setConfirm,
+        setText,
+        setTimer,
+        setRecordVoice,
+        setStartCountdown,
+        setTimerCountdown,
+      }}
+    >
+      {children}
+    </PrompterContext.Provider>
+  );
 };
 
-export default useHome;
+// Create a custom hook for using the PrompterContext
+export const usePrompter = () => {
+  const context = useContext(PrompterContext);
+  if (!context) {
+    throw new Error("usePrompter must be used within a PrompterProvider");
+  }
+  return context;
+};

@@ -40,14 +40,14 @@ const Countdown: React.FC<CountdownProps> = ({ initialTime, start }) => {
   };
 
   useEffect(() => {
-    if (initialTime.includes(":")) {
+    if (initialTime && initialTime.includes(":")) {
       console.log("initialTime", initialTime);
       setTime(parseTime(initialTime));
     }
   }, [initialTime]);
 
   return (
-    <div>
+    <div className="bg-white/25 p-2 pr-10 text-xl rounded">
       <p>Time left: {formatTime(time)}</p>
     </div>
   );

@@ -1,70 +1,38 @@
 "use client";
 
-import Countdown from "@/components/Countdown";
-import Prompter from "@/components/Prompter";
 import TimePicker from "@/components/TimePicker";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import useHome from "@/hooks/useHome";
-import { useEffect } from "react";
+import { usePrompter } from "@/contexts/prompterContext";
 
 export default function Home() {
-  const {
-    actualIndex,
-    prompterText,
-    recordVoice,
-    startCountdown,
-    timer,
-    timerCountdown,
-    setActualIndex,
-    setConfirm,
-    setRecordVoice,
-    setStartCountdown,
-    setText,
-    setTimer,
-    setTimerCountdown,
-  } = useHome();
-
-  useEffect(() => {
-    console.log("timer", timer)
-  }, [timer]);
+  const { timer, router, setConfirm, setText, setTimer, setTimerCountdown } =
+    usePrompter();
 
   return (
-    <div className="flex flex-col items-center mt-10">
-      <div className="flex gap-3 items-center w-[80vw]">
-        <Textarea
-          className="h-[20vh]"
-          onChange={(e) => {
-            setText(e.target.value);
-          }}
-        />
-        <div className="flex flex-col gap-5">
-          <TimePicker setTimer={setTimer} />
-          <Button
-            onClick={() => {
-              setTimerCountdown(timer);
-              setConfirm(true);
-            }}
-          >
-            Confirm
-          </Button>
-        </div>
-      </div>
-
-      <div className="mt-16">
-        <Countdown initialTime={timerCountdown} start={startCountdown} />
+    <div className="flex flex-col justify-center items-center h-screen gap-10">
+      <h1 className="text-7xl text-[#000957]">
+        CON<span className="text-8xl text-[#EBE645]">U</span>PITCH ?
+      </h1>
+      <Textarea
+        className="h-[40vh] w-[80vw] bg-white"
+        placeholder="Enter your text here"
+        onChange={(e) => {
+          setText(e.target.value);
+        }}
+      />
+      <div className="flex flex-col gap-5">
+        <TimePicker setTimer={setTimer} />
         <Button
-          className="ml-5 bg-red-500 w-10 h-10 rounded-full"
+          className="rounded bg-[#000957]"
           onClick={() => {
-            setRecordVoice(!recordVoice);
-            setStartCountdown(!startCountdown);
+            setTimerCountdown(timer);
+            setConfirm(true);
+            router.push("/prompter");
           }}
         >
-          <div
-            className={`w-2 h-2 bg-white ${recordVoice ? "" : "rounded-full"}`}
-          />
+          Confirm
         </Button>
-        <Prompter text={prompterText} actualId={actualIndex} setActualId={setActualIndex} />
       </div>
     </div>
   );
