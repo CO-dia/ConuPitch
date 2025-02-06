@@ -4,9 +4,10 @@ import TimePicker from "@/components/TimePicker";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { usePrompter } from "@/contexts/prompterContext";
+import { RotatingLines } from "react-loader-spinner";
 
 export default function Home() {
-  const { timer, setConfirm, setText, setTimer, setTimerCountdown } =
+  const { timer, loading, setConfirm, setText, setTimer, setTimerCountdown } =
     usePrompter();
 
   return (
@@ -30,7 +31,17 @@ export default function Home() {
             setConfirm(true);
           }}
         >
-          Confirm
+          {loading ? (
+            <RotatingLines
+              strokeColor="grey"
+              strokeWidth="5"
+              animationDuration="0.75"
+              width="96"
+              visible={true}
+            />
+          ) : (
+            "Confirm"
+          )}
         </Button>
       </div>
     </div>

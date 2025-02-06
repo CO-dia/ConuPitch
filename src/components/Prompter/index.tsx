@@ -1,17 +1,17 @@
+import { ChunkWithTime } from "@/utils/Estimate";
 import React from "react";
 
 type PrompterProps = {
-  text: string[];
   actualId: number;
   setActualId: React.Dispatch<React.SetStateAction<number>>;
-  timing: any[];
+  timing: ChunkWithTime[];
 };
 
-const Prompter = ({ text, actualId, setActualId, timing }: PrompterProps): JSX.Element => {
+const Prompter = ({ actualId, setActualId, timing }: PrompterProps): JSX.Element => {
   console.log("timing", timing);
   return (
     <div className="border w-full min-h-[50vh] bg-white">
-      {text.map((line, index) => (
+      {timing.map((line, index) => (
         <>
           <div
             className={`flex gap-10 text-4xl ${
@@ -20,13 +20,13 @@ const Prompter = ({ text, actualId, setActualId, timing }: PrompterProps): JSX.E
               index < actualId ? "text-gray-400" : ""
             }`}
           >
-            <p>{timing[index]?.time}</p>
+            <p>{line?.timeDisplay}</p>
             <p
               key={index}
               id={index.toString()}
               onClick={() => setActualId(index)}
             >
-              {line}
+              {line.text}
             </p>
           </div>
           <br />

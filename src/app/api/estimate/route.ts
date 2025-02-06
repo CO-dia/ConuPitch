@@ -1,10 +1,11 @@
 import { NextRequest } from "next/server";
-import OpenAI from "openai";
+// import OpenAI from "openai";
 
 export async function POST(request: NextRequest) {
   const { chunks, time } = await request.json();
-
-  const openai = new OpenAI({
+  console.log("Chunks:", chunks);
+  console.log("Time:", time);
+  /* const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
     dangerouslyAllowBrowser: true,
   });
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
   const estimatedTime = JSON.parse(
     completion.choices[0].message.content || "[]"
-  );
+  ); */
 
-  return Response.json({ estimatedTime });
+  return Response.json({ test: "estimatedTime" });
 }

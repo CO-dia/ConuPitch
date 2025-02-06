@@ -10,14 +10,11 @@ const PrompterPage = () => {
   const {
     actualIndex,
     actualIndexRef,
-    elapsedTime,
-    prompterText,
     progressText,
     recordVoice,
     startCountdown,
     timing,
     setActualIndex,
-    setElapsedTime,
     setRecordVoice,
     setStartCountdown,
     setProgressText,
@@ -37,11 +34,10 @@ const PrompterPage = () => {
             {recordVoice ? "Stop" : "Start"}
           </Button>
           <div className="text-4xl">{progressText}</div>
-          <Countdown actualIdRef={actualIndexRef}  timing={timing} setProgressText={setProgressText} elapsedTime={elapsedTime} start={startCountdown} setElapsedTime={setElapsedTime} />
+          <Countdown actualIdRef={actualIndexRef}  timing={timing} setProgressText={setProgressText} start={startCountdown} />
         </div>
         <div className="mt-40">
           <Prompter
-            text={prompterText}
             actualId={actualIndex}
             setActualId={setActualIndex}
             timing={timing}

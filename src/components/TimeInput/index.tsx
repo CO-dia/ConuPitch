@@ -12,7 +12,7 @@ const TimeInput: React.FC<TimeInputProps> = ({ name, value, maximum, setValue })
   return (
     <div className="flex flex-col items-center">
       <Input
-        className="border w-20 h-12 text-center bg-white/25 text-white"
+        className="border w-20 h-12 text-3xl text-center bg-white/25 text-white"
         value={value}
         type="number"
         min={0}

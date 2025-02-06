@@ -1,5 +1,6 @@
 "use client";
 
+import { ChunkWithTime, estimate } from "@/utils/Estimate";
 import Fuse from "fuse.js";
 import { useRouter } from "next/navigation";
 import React, {
@@ -15,8 +16,8 @@ import React, {
 interface PrompterContextType {
   actualIndex: number;
   actualIndexRef: React.MutableRefObject<number>;
-  elapsedTime: number;
   isSpeechRecognitionSupported: boolean;
+  loading: boolean;
   prompterText: string[];
   progressText: string;
   recordVoice: boolean;
@@ -26,7 +27,6 @@ interface PrompterContextType {
   timerCountdown: any;
   timing: any[];
   setActualIndex: React.Dispatch<React.SetStateAction<number>>;
-  setElapsedTime: React.Dispatch<React.SetStateAction<number>>;
   setConfirm: React.Dispatch<React.SetStateAction<boolean>>;
   setProgressText: React.Dispatch<React.SetStateAction<string>>;
   setText: React.Dispatch<React.SetStateAction<string>>;
@@ -51,12 +51,10 @@ const PrompterContext = createContext<PrompterContextType | undefined>(
 
 // Provide the context to the application
 export const PrompterProvider = ({ children }: { children: ReactNode }) => {
-  // For countdown
-  const [elapsedTime, setElapsedTime] = useState(0);
   const [progressText, setProgressText] = useState("");
   const [startCountdown, setStartCountdown] = useState(false);
   const [timerCountdown, setTimerCountdown] = useState();
-  const [timing, setTiming] = useState<any[]>([]);
+  const [timing, setTiming] = useState<ChunkWithTime[]>([]);
 
   // For prompter
   const [prompterText, setPrompterText] = useState<string[]>([]);
@@ -64,6 +62,7 @@ export const PrompterProvider = ({ children }: { children: ReactNode }) => {
   // For line selection
   const [actualIndex, setActualIndex] = useState(0);
 
+  const [loading, setLoading] = useState(false);
   // For recording voice
   const [recordVoice, setRecordVoice] = useState(false);
   const [micStream, setMicStream] = useState<MediaStream | null>(null);
@@ -236,6 +235,7 @@ export const PrompterProvider = ({ children }: { children: ReactNode }) => {
   // Handle confirmation logic
   useEffect(() => {
     if (confirm) {
+      setLoading(true);
       const processedText = processText(text);
       setPrompterText(processedText);
       const nonEmptyChunks = processedText.filter(
@@ -246,21 +246,11 @@ export const PrompterProvider = ({ children }: { children: ReactNode }) => {
         id: index,
         chunk,
       }));
-      fetch("/api/estimate", {
-        method: "POST",
-        body: JSON.stringify({ chunks: chunks, time: timer }),
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          console.log("Estimated time:", data.estimatedTime);
-          setTiming(data.estimatedTime);
-          router.push("/prompter");
-        })
-        .catch((error) => {
-          console.error("Error estimating time:", error);
-        });
-
+      
+      const estimatedTiming = estimate({ chunksArray: chunks, time: timer });
+      setTiming(estimatedTiming);
       setConfirm(false);
+      router.push("/prompter");
     }
   }, [confirm]);
 
@@ -269,8 +259,8 @@ export const PrompterProvider = ({ children }: { children: ReactNode }) => {
       value={{
         actualIndex,
         actualIndexRef,
-        elapsedTime,
         isSpeechRecognitionSupported,
+        loading,
         prompterText,
         progressText,
         recordVoice,
@@ -280,7 +270,6 @@ export const PrompterProvider = ({ children }: { children: ReactNode }) => {
         timerCountdown,
         timing,
         setActualIndex,
-        setElapsedTime,
         setProgressText,
         setConfirm,
         setText,
@@ -296,7 +285,7 @@ export const PrompterProvider = ({ children }: { children: ReactNode }) => {
 };
 
 // Create a custom hook for using the PrompterContext
-export const usePrompter = () => {
+export const usePrompter = (): PrompterContextType => {
   const context = useContext(PrompterContext);
   if (!context) {
     throw new Error("usePrompter must be used within a PrompterProvider");

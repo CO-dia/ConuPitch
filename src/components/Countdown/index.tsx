@@ -1,35 +1,42 @@
-import React, { useEffect } from "react";
+import { ChunkWithTime } from "@/utils/Estimate";
+import React, { useEffect, useState } from "react";
 
 type TimerProps = {
-  elapsedTime: number; // Elapsed time in seconds
   actualIdRef: React.MutableRefObject<number>; // Current index of the prompter text
   start: boolean; // Whether to start the timer
-  timing: any[];
-  setElapsedTime: React.Dispatch<React.SetStateAction<number>>; // Function to update the elapsed time
+  timing: ChunkWithTime[];
   setProgressText: React.Dispatch<React.SetStateAction<string>>; // Function to update the progress text
 };
 
 const Timer: React.FC<TimerProps> = ({
-  elapsedTime,
   actualIdRef,
   start,
   timing,
-  setElapsedTime,
   setProgressText,
 }) => {
+  const [elapsedTime, setElapsedTime] = useState(0);
+
+  useEffect(() => {
+    if (elapsedTime === 0) return;
+
+    if (
+      (elapsedTime <= timing[actualIdRef.current].timeSeconds &&
+        elapsedTime >= timing[actualIdRef.current].timeSeconds - 3) ||
+      (elapsedTime >= timing[actualIdRef.current].timeSeconds &&
+        elapsedTime <= timing[actualIdRef.current].timeSeconds + 3)
+    ) {
+      setProgressText("On time");
+    } else if (timing[actualIdRef.current].timeSeconds < elapsedTime) {
+      setProgressText("Late");
+    } else {
+      setProgressText("Early");
+    }
+  }, [elapsedTime]);
+
   useEffect(() => {
     if (start) {
       const timer = setInterval(() => {
-        console.log("timing", timing);
-        console.log("actualId", actualIdRef.current);
-        if (timing[actualIdRef.current].time === elapsedTime) {
-          setProgressText("On time");
-        } else if (timing[actualIdRef.current].time < elapsedTime) {
-          setProgressText("Late");
-        } else {
-          setProgressText("Early");
-        }
-        setElapsedTime((time) => time + 1); // Increment time by 1 second
+        setElapsedTime((prev) => prev + 1); // Increment time by 1 second
       }, 1000);
 
       return () => clearInterval(timer); // Cleanup on unmount
